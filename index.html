@@ -1,0 +1,79 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Socket.IO chat</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font: 13px Helvetica, Arial; }
+      form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
+      form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
+      form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
+      #messages { list-style-type: none; margin: 0; padding: 0; }
+      #messages li { padding: 5px 10px; }
+      #messages li:nth-child(odd) { background: #eee; }
+    </style>
+  </head>
+  <body>
+<div id="app">
+      <!-- 消息列表 -->
+    <ul id="messages">
+        <li v-for="item in messages">{{item}}</li>
+    </ul>
+    <form action="" @submit.prevent="onSend()">
+      <input v-model.trim="message" id="m" autocomplete="off" />
+      <button>发送</button>
+    </form>
+</div>
+
+    <!-- 加载客户端脚本,客户端会向全局暴露一个io接口 -->
+<script src="/socket.io/socket.io.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script>
+
+    //与当前网页建立连接
+    var socket = io();
+    //     //接受服务端的消息
+    //     socket.on('time',data => {
+    //     console.log('time->',data)
+    // })
+
+    // //给服务端发送消息
+    // setInterval(() => {
+    //     socket.emit('hello','在吗？老铁') 
+    // }, 1000);
+
+
+    new Vue({
+        el:'#app',
+        data:{
+            message:'',//消息
+            messages:[],//所有消息
+        },
+        methods:{
+            onSend(){
+                //发送消息
+                let message = this.message
+                if(!message.length){
+                    return
+                }
+                if(message.length > 30){
+                    window.alert('不大于30个字符')
+                    return
+                }
+                socket.emit('message',message)
+                this.message = ''
+            }
+        },
+        created(){
+           socket.on('chat-message',message => {
+                this.messages.unshift(message)
+           }) 
+        }
+    })
+    
+   
+</script>
+  
+
+</body>
+</html>
